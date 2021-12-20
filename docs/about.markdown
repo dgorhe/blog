@@ -4,7 +4,14 @@ title: About
 permalink: /about/
 ---
 
-This is the base Jekyll theme. You can find out more info about customizing your Jekyll theme, as well as basic Jekyll usage documentation at [jekyllrb.com](https://jekyllrb.com/)
+I am a first Data Science MS student at Columbia University. This is just my outlet for random things I want to research and write about. I have the following topics in mind for the near future:
+
+- Governance and Lack Thereof
+- Will Academic Linguistics Help Me Learn Russian?
+- CO2 Priors and Scope
+- Farmland vs Indoor Farming
+- Self-Driving Forklifts: Why Aren't They Here?
+- When Will Gas Stations Become Uneconomical?
 
 You can find the source code for Minima at GitHub:
 [jekyll][jekyll-organization] /
