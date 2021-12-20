@@ -4,7 +4,7 @@ title: About
 permalink: /about/
 ---
 
-I am a first Data Science MS student at Columbia University. This is just my outlet for random things I want to research and write about. I have the following topics in mind for the near future:
+I am a first year Data Science MS student at Columbia University. This is just my outlet for random things I want to research and write about. I have the following topics in mind for the near future:
 
 - Governance and Lack Thereof
 - Will Academic Linguistics Help Me Learn Russian?
