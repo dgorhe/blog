@@ -1,7 +1,5 @@
-./exploratory/r/.Rproj.user
-./exploratory/r/.Rhistory
-./exploratory/r/.RData
-./exploratory/r/.Ruserdata
+exploratory/r/test/.Rhistory
+exploratory/r/test/.Rproj.user/*
 
 # Posts to Ignore
 docs/_posts/2021-12-20-Test-Post.markdown
