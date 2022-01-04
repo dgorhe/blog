@@ -2,3 +2,7 @@
 ./exploratory/r/.Rhistory
 ./exploratory/r/.RData
 ./exploratory/r/.Ruserdata
+
+# Posts to Ignore
+docs/_posts/2021-12-20-Test-Post.markdown
+docs/_posts/2021-12-20-welcome-to-jekyll.markdown
