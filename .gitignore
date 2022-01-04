@@ -1,7 +1,5 @@
 .DS_Store
-
-exploratory/r/test/.Rhistory
-exploratory/r/test/.Rproj.user/*
+exploratory/r/test/*
 
 # Posts to Ignore
 docs/_posts/2021-12-20-Test-Post.markdown
