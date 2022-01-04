@@ -2,7 +2,7 @@
 layout: post
 title:  "DAOs All The Way Down"
 date:   2022-01-04 04:44:00 -0500
-categories: jekyll update
+categories: decentralization
 ---
 
 ## Preamble
