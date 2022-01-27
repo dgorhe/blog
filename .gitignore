@@ -1,6 +1,5 @@
-.DS_Store
-exploratory/r/test/*
-
-# Posts to Ignore
-docs/_posts/2021-12-20-Test-Post.markdown
-docs/_posts/2021-12-20-welcome-to-jekyll.markdown
+_site
+.sass-cache
+.jekyll-cache
+.jekyll-metadata
+vendor
