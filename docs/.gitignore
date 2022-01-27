@@ -1,9 +1,0 @@
-_site
-.sass-cache
-.jekyll-cache
-.jekyll-metadata
-vendor
-
-# Posts to Ignore
-_posts/2021-12-20-Test-Post.markdown
-_posts/2021-12-20-welcome-to-jekyll.markdown
