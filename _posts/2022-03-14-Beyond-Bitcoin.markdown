@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  "DAOs All The Way Down"
+title:  "Beyond Bitcoin: How to Implement Decentralized Societies"
 date:   2022-01-07 09:10:00 -0800
 categories: decentralization
 ---
@@ -87,6 +87,13 @@ Leaving a DAO would increase the voting power of each share but not by much. Sim
 ## Conclusion
 Decentralization is more than just bitcoin. Aren't you so sick of hearing the same buzzwords and explanations over and over again? "Bitcoin is like digital gold", "It's a ledger that governments can't control" and on and on. We should demand some tangible core product value from blockchains beyond new toys for financial arbitrage. We should be asking for things like cryptocurrency based payroll so we can get paid on a daily or even hourly basis. We should ask for logistics to be a series of smart contracts where changes in warehouse capacity automatically triggers a change in purchase orders. For every dotcom era company we remember today there were dozens that were total nonsense and rightfully called out for being so. Bitcoin might Java Applets and JavaScript might be right under our noses.
 
+
+## Addendum
+I want to address probably the best set of criticisms against crypto-adjacent topics. There was a video by Folding Ideas titled Line Goes Up - The Problem With NFTs where he lambasts the idea of crypto currency. He cites the speculative nature of crypto as a continuation of the post 2008 financial crisis and the case is very compelling. Relevant to this posts, he unequivocally rejects the idea of crypto token based governance. 
+
+> "... while the claim is that these machines will democratize the internet, the technical complexity they add, the new speciailized programming expertise that they require, concentrates a lot of power in the hands of people who can build the templates that in turn enable non-programmers to actually use it."
+
+What I’m proposing here is different because I don’t think I'm proposing a template for DAOs themselves. I’m suggesting that digitizing identities in a robust, seamless way will allow variegated DAOs to emerge. Identification is also a very well understood interface between the analog and digital world so I think average people could wrap their heads around this aspect in particular. Perhaps I’m buying into the decadent ideas put forth by cryto-evangelists but I don’t think I am. Please correct me if I’m wrong. I don't want to get too far into this criticism, but I can dive deeper if anyone wants.
 
 [bitcoin]: https://github.com/bitcoin/bitcoin
 [babies-born-per-day]: https://www.theworldcounts.com/stories/How-Many-Babies-Are-Born-Each-Day
