@@ -17,7 +17,7 @@
 <meta name="twitter:card" content="summary" />
 <meta property="twitter:title" content="Using Columbia University’s Ginsburg HPC" />
 <script type="application/ld+json">
-{"dateModified":"2022-10-28T16:00:00-04:00","datePublished":"2022-10-28T16:00:00-04:00","mainEntityOfPage":{"@type":"WebPage","@id":"https://dgorhe.github.io/blog/educational/2022/10/28/How-To-Use-Ginsburg.html"},"url":"https://dgorhe.github.io/blog/educational/2022/10/28/How-To-Use-Ginsburg.html","description":"Introduction Ginsburg is the name of Columbia University’s newest high performance computing cluster (HPC). As a Data Science Master’s student at the university I’ve been using Ginsburg for my work in the Jovanovic Lab. There’s plenty of very basic stuff in Ginsburg’s documentation. I want to cover some more involved things which could improve your quality of life while using or developing code, dramatically decrease the amount of time it takes to run code, or make some things feasible which were previously infeasible.","headline":"Using Columbia University’s Ginsburg HPC","@type":"BlogPosting","@context":"https://schema.org"}</script>
+{"url":"https://dgorhe.github.io/blog/educational/2022/10/28/How-To-Use-Ginsburg.html","headline":"Using Columbia University’s Ginsburg HPC","dateModified":"2022-10-28T16:00:00-04:00","datePublished":"2022-10-28T16:00:00-04:00","mainEntityOfPage":{"@type":"WebPage","@id":"https://dgorhe.github.io/blog/educational/2022/10/28/How-To-Use-Ginsburg.html"},"description":"Introduction Ginsburg is the name of Columbia University’s newest high performance computing cluster (HPC). As a Data Science Master’s student at the university I’ve been using Ginsburg for my work in the Jovanovic Lab. There’s plenty of very basic stuff in Ginsburg’s documentation. I want to cover some more involved things which could improve your quality of life while using or developing code, dramatically decrease the amount of time it takes to run code, or make some things feasible which were previously infeasible.","@type":"BlogPosting","@context":"https://schema.org"}</script>
 <!-- End Jekyll SEO tag -->
 <link rel="stylesheet" href="/blog/assets/main.css"><link type="application/atom+xml" rel="alternate" href="https://dgorhe.github.io/blog/feed.xml" title="Know Thyself" /></head>
 <body><header class="site-header" role="banner">
@@ -54,7 +54,7 @@
 <h1 id="how-to-avoid-typing-your-password-each-time">How to Avoid Typing Your Password Each Time</h1>
 <p>This seems like a pretty pedantic thing, but if you’re logging in and out of Ginsburg all the time, it can get pretty annoying. Fortunately there’s a pretty simple solution. Your computer checks a folder called <code class="language-plaintext highlighter-rouge">~/.ssh/</code> whenever you login via <code class="language-plaintext highlighter-rouge">ssh</code>. Specifically it checks whether a matching key is available on the remote machine. It’s not exactly a copy but the details are not super important.</p>
 
-<h2 id="step-1">Step 1.</h2>
+<h3 id="step-1">Step 1.</h3>
 <p>First we want to check if the key is already available</p>
 
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>ls ~/.ssh/
@@ -62,7 +62,7 @@
 
 <p>If the files <code class="language-plaintext highlighter-rouge">id_ed25519</code> and <code class="language-plaintext highlighter-rouge">id_ed25519.pub</code> are already there, skip to <a href="#step-3">Step 3</a></p>
 
-<h2 id="step-2">Step 2.</h2>
+<h3 id="step-2">Step 2.</h3>
 <p>Assuming the keys are not there, we’ll generate them with the following command</p>
 
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>ssh-keygen -t ed25519
@@ -78,7 +78,7 @@ Your identification has been saved in $HOME/.ssh/id_ed25519.
 Your public key has been saved in $HOME/.ssh/id_ed25519.pub.
 </code></pre></div></div>
 
-<h2 id="step-3">Step 3.</h2>
+<h3 id="step-3">Step 3.</h3>
 <p>Now we want to put the public key onto Ginsburg with the following command. Make sure to replace <code class="language-plaintext highlighter-rouge">&lt;UNI&gt;</code> with your actual UNI. This part will still prompt you to put in your password.</p>
 
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>cat ~/.ssh/id_ed25519.pub | ssh &lt;UNI&gt;@ginsburg.rcs.columbia.edu 'cat - &gt;&gt; ~/.ssh/authorized_keys' 
@@ -86,7 +86,7 @@ Your public key has been saved in $HOME/.ssh/id_ed25519.pub.
 
 <p>This command basically opens one of the files we just created, sends it over to Ginsburg, and tells Ginsburg to recognize the host computer (i.e. your laptop, desktop, etc) whenever we use <code class="language-plaintext highlighter-rouge">ssh</code>.</p>
 
-<h2 id="step-4">Step 4.</h2>
+<h3 id="step-4">Step 4.</h3>
 <p>Double check that everything works by logging out of Ginsburg (you can just type <code class="language-plaintext highlighter-rouge">exit</code> and then hit Enter to leave Ginsburg).</p>
 
 <hr />
@@ -95,10 +95,10 @@ Your public key has been saved in $HOME/.ssh/id_ed25519.pub.
 
 <p>I’ve found the easiest way to do this is to create a template bash script and use python to ‘configure’ each template and submit that configuration as a job. I’ll show this with a concrete example.</p>
 
-<h2 id="problem">Problem</h2>
+<h3 id="problem">Problem</h3>
 <p>We have a bunch of files called <code class="language-plaintext highlighter-rouge">.bed</code> files. We want to annotate them using a program called <code class="language-plaintext highlighter-rouge">annotator</code>. However, there are 50 files and each file takes 15-20 minutes to run. If we ran them all one after the other it would take 12-16 <em>hours</em> to run. Let’s see how we can submit multiple jobs concurrently.</p>
 
-<h2 id="solution">Solution</h2>
+<h3 id="solution">Solution</h3>
 <p>Here is the directory structure of our folder</p>
 
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>├── submit_jobs.py
@@ -196,14 +196,14 @@ python submit_jobs.py \
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>bash submit.sh
 </code></pre></div></div>
 
-<h2 id="outcome">Outcome</h2>
+<h3 id="outcome">Outcome</h3>
 <p>This would run the <code class="language-plaintext highlighter-rouge">python</code> command with the proper arguments for all the directory paths. The python program in turn creates various batch jobs by parsing each file in the directory. The various batch jobs are independent of one another so they’re all running separately. The result is that what would’ve taken 12-16 hours now only takes 30 to 45 minutes to run.</p>
 
 <hr />
 <h1 id="building-custom-singularity-containers">Building Custom Singularity Containers</h1>
 <p>Containers are like miniature computers inside your computer that can package your application in a very isolated way. Ginsburg like most HPCs does not allow users to build or run Docker containers which is the most popular containerization software. This is mainly because Docker requires root privileges on the computer which is risky on a shared resource like an HPC.</p>
 
-<h2 id="step-1-1">Step 1.</h2>
+<h3 id="step-1-1">Step 1.</h3>
 <p>First we want to create a singularity container to contain all the dependencies of our project since it uses both R and Python. In our case, there is an existing Docker container which can do this. We want to build the container on our local machine. Go to the directory with the <code class="language-plaintext highlighter-rouge">Dockerfile</code> and run</p>
 
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code> docker build . -t &lt;tag name&gt;
@@ -211,7 +211,7 @@ python submit_jobs.py \
 
 <p><code class="language-plaintext highlighter-rouge">&lt;tag name&gt;</code> is whatever tag you want to use to easily identify your container.</p>
 
-<h2 id="step-2-1">Step 2.</h2>
+<h3 id="step-2-1">Step 2.</h3>
 <p>Save the image as a <code class="language-plaintext highlighter-rouge">tar</code> file.</p>
 
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>docker save &lt;tag name&gt; -o &lt;filename&gt;.tar
@@ -222,13 +222,13 @@ python submit_jobs.py \
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>docker save darveshgorhe/secat-dev -o secat.tar
 </code></pre></div></div>
 
-<h2 id="step-3-1">Step 3.</h2>
+<h3 id="step-3-1">Step 3.</h3>
 <p>Upload the <code class="language-plaintext highlighter-rouge">tar</code> file to Ginsburg using <code class="language-plaintext highlighter-rouge">scp</code>. You can also use the Globus tool to upload the <code class="language-plaintext highlighter-rouge">tar</code> file wherever you want.</p>
 
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>scp &lt;filename&gt;.tar '&lt;UNI&gt;@ginsburg.rcs.columbia.edu:&lt;path to store tar file&gt;'
 </code></pre></div></div>
 
-<h2 id="step-4-1">Step 4.</h2>
+<h3 id="step-4-1">Step 4.</h3>
 <p>On Ginsburg, build your container from the tar file as a sandbox container</p>
 
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>singularity build --sandbox &lt;sandbox name&gt; docker-archive://&lt;filename&gt;.tar
@@ -238,10 +238,10 @@ python submit_jobs.py \
 <h1 id="developing-a-python-package-on-ginsburg">Developing a Python Package on Ginsburg</h1>
 <p>I’ve recently been trying to improve a package called <a href="https://github.com/grosenberger/secat">SECAT</a> for analyzing SEC-SWATCH Mass Spectrometry data. The package requires a lot of memory and compute to run in a reasonable amount of time. Specifically it requires more memory than I have available on my computer and it heavily utilizes multiprocessing to parallelize parts of the code. What might take hours on a local machine can be done in less than 20 minutes on the computer. Since I’m editing the code very often, hours long runs are impractical. How can we use Ginsburg to solve this problem?</p>
 
-<h2 id="step-1-2">Step 1.</h2>
+<h3 id="step-1-2">Step 1.</h3>
 <p>Make sure you have a singularity sandbox container with all the proper dependencies. If you’re not sure how to make one, look at the <a href="#building-custom-singularity-containers">previous section</a>.</p>
 
-<h2 id="step-2-2">Step 2.</h2>
+<h3 id="step-2-2">Step 2.</h3>
 <p>Install the python package you want in editatable mode. Editable mode tells your Python interpreter to look at the folder you specified rather than the default location of your packages. First clone what ever repository you want with</p>
 
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git clone &lt;git repository link&gt;
@@ -264,7 +264,7 @@ python_package
 ├── ...
 </code></pre></div></div>
 
-<h2 id="step-3-2">Step 3.</h2>
+<h3 id="step-3-2">Step 3.</h3>
 <p>Check that the sandbox + editable python package works properly. In my case I would edit some of the help documentation and then type in <code class="language-plaintext highlighter-rouge">singularity exec sandbox secat --help</code> to ensure that everything was installed properly. If it works you should see your changes reflected in the output of your command. Just running the program could also be a good way to check, but make sure your edits are reflected in the program’s execution. Deleting an import and checking if it works is another quick way to check.</p>
 
 <h1 id="glossary">Glossary</h1>

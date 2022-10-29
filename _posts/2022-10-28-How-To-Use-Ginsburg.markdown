@@ -12,7 +12,7 @@ Ginsburg is the name of Columbia University's newest high performance computing 
 # How to Avoid Typing Your Password Each Time 
 This seems like a pretty pedantic thing, but if you're logging in and out of Ginsburg all the time, it can get pretty annoying. Fortunately there's a pretty simple solution. Your computer checks a folder called `~/.ssh/` whenever you login via `ssh`. Specifically it checks whether a matching key is available on the remote machine. It's not exactly a copy but the details are not super important.
 
-## Step 1.
+### Step 1.
 First we want to check if the key is already available
 
 ```
@@ -21,7 +21,7 @@ ls ~/.ssh/
 
 If the files `id_ed25519` and `id_ed25519.pub` are already there, skip to [Step 3](#step-3)
 
-## Step 2. 
+### Step 2. 
 Assuming the keys are not there, we'll generate them with the following command
 
 ```
@@ -39,7 +39,7 @@ Your identification has been saved in $HOME/.ssh/id_ed25519.
 Your public key has been saved in $HOME/.ssh/id_ed25519.pub.
 ```
 
-## Step 3.
+### Step 3.
 Now we want to put the public key onto Ginsburg with the following command. Make sure to replace `<UNI>` with your actual UNI. This part will still prompt you to put in your password.
 
 ```
@@ -48,7 +48,7 @@ cat ~/.ssh/id_ed25519.pub | ssh <UNI>@ginsburg.rcs.columbia.edu 'cat - >> ~/.ssh
 
 This command basically opens one of the files we just created, sends it over to Ginsburg, and tells Ginsburg to recognize the host computer (i.e. your laptop, desktop, etc) whenever we use `ssh`.
 
-## Step 4.
+### Step 4.
 Double check that everything works by logging out of Ginsburg (you can just type `exit` and then hit Enter to leave Ginsburg).
 
 ---
@@ -57,10 +57,10 @@ A really common use case in biology labs is performing some time-consuming proce
 
 I've found the easiest way to do this is to create a template bash script and use python to 'configure' each template and submit that configuration as a job. I'll show this with a concrete example.
 
-## Problem
+### Problem
 We have a bunch of files called `.bed` files. We want to annotate them using a program called `annotator`. However, there are 50 files and each file takes 15-20 minutes to run. If we ran them all one after the other it would take 12-16 *hours* to run. Let's see how we can submit multiple jobs concurrently.
 
-## Solution
+### Solution
 Here is the directory structure of our folder
 
 ```
@@ -164,14 +164,14 @@ python submit_jobs.py \
 bash submit.sh
 ```
 
-## Outcome
+### Outcome
 This would run the `python` command with the proper arguments for all the directory paths. The python program in turn creates various batch jobs by parsing each file in the directory. The various batch jobs are independent of one another so they're all running separately. The result is that what would've taken 12-16 hours now only takes 30 to 45 minutes to run.
 
 ---
 # Building Custom Singularity Containers
 Containers are like miniature computers inside your computer that can package your application in a very isolated way. Ginsburg like most HPCs does not allow users to build or run Docker containers which is the most popular containerization software. This is mainly because Docker requires root privileges on the computer which is risky on a shared resource like an HPC.
 
-## Step 1.
+### Step 1.
 First we want to create a singularity container to contain all the dependencies of our project since it uses both R and Python. In our case, there is an existing Docker container which can do this. We want to build the container on our local machine. Go to the directory with the `Dockerfile` and run
 
 ```
@@ -180,7 +180,7 @@ First we want to create a singularity container to contain all the dependencies 
 
 `<tag name>` is whatever tag you want to use to easily identify your container.
 
-## Step 2.
+### Step 2.
 Save the image as a `tar` file.
 
 ```
@@ -193,14 +193,14 @@ docker save <tag name> -o <filename>.tar
 docker save darveshgorhe/secat-dev -o secat.tar
 ```
 
-## Step 3.
+### Step 3.
 Upload the `tar` file to Ginsburg using `scp`. You can also use the Globus tool to upload the `tar` file wherever you want.
 
 ```
 scp <filename>.tar '<UNI>@ginsburg.rcs.columbia.edu:<path to store tar file>'
 ```
 
-## Step 4.
+### Step 4.
 On Ginsburg, build your container from the tar file as a sandbox container
 
 ```
@@ -211,10 +211,10 @@ singularity build --sandbox <sandbox name> docker-archive://<filename>.tar
 # Developing a Python Package on Ginsburg
 I've recently been trying to improve a package called [SECAT](https://github.com/grosenberger/secat) for analyzing SEC-SWATCH Mass Spectrometry data. The package requires a lot of memory and compute to run in a reasonable amount of time. Specifically it requires more memory than I have available on my computer and it heavily utilizes multiprocessing to parallelize parts of the code. What might take hours on a local machine can be done in less than 20 minutes on the computer. Since I'm editing the code very often, hours long runs are impractical. How can we use Ginsburg to solve this problem?
 
-## Step 1.
+### Step 1.
 Make sure you have a singularity sandbox container with all the proper dependencies. If you're not sure how to make one, look at the [previous section](#building-custom-singularity-containers).
 
-## Step 2.
+### Step 2.
 Install the python package you want in editatable mode. Editable mode tells your Python interpreter to look at the folder you specified rather than the default location of your packages. First clone what ever repository you want with 
 
 ```
@@ -240,8 +240,7 @@ python_package
 ├── ...
 ```
 
-
-## Step 3. 
+### Step 3. 
 Check that the sandbox + editable python package works properly. In my case I would edit some of the help documentation and then type in `singularity exec sandbox secat --help` to ensure that everything was installed properly. If it works you should see your changes reflected in the output of your command. Just running the program could also be a good way to check, but make sure your edits are reflected in the program's execution. Deleting an import and checking if it works is another quick way to check.
 
 
