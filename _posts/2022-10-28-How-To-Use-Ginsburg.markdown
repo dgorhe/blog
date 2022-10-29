@@ -8,6 +8,7 @@ categories: educational
 # Introduction
 Ginsburg is the name of Columbia University's newest high performance computing cluster (HPC). As a Data Science Master's student at the university I've been using Ginsburg for my work in the [Jovanovic Lab](http://jovanoviclab.com/). There's plenty of very basic stuff in [Ginsburg's documentation](https://confluence.columbia.edu/confluence/display/rcs/Ginsburg%3A+Getting+Started). I want to cover some more involved things which could improve your quality of life while using or developing code, dramatically decrease the amount of time it takes to run code, or make some things feasible which were previously infeasible.
 
+---
 # How to Avoid Typing Your Password Each Time 
 This seems like a pretty pedantic thing, but if you're logging in and out of Ginsburg all the time, it can get pretty annoying. Fortunately there's a pretty simple solution. Your computer checks a folder called `~/.ssh/` whenever you login via `ssh`. Specifically it checks whether a matching key is available on the remote machine. It's not exactly a copy but the details are not super important.
 
@@ -50,6 +51,7 @@ This command basically opens one of the files we just created, sends it over to 
 ## Step 4.
 Double check that everything works by logging out of Ginsburg (you can just type `exit` and then hit Enter to leave Ginsburg).
 
+---
 # Performing Multiple Jobs Concurrently
 A really common use case in biology labs is performing some time-consuming processing/analysis on multiple files. More generally, sometimes we want to run a program multiple times with different parameters and the inputs of each run are not dependent on the outputs of another run. As a result we don't care how quickly each thing finishes as long as we don't have to do them one after another. 
 
@@ -165,11 +167,9 @@ bash submit.sh
 ## Outcome
 This would run the `python` command with the proper arguments for all the directory paths. The python program in turn creates various batch jobs by parsing each file in the directory. The various batch jobs are independent of one another so they're all running separately. The result is that what would've taken 12-16 hours now only takes 30 to 45 minutes to run.
 
+---
 # Building Custom Singularity Containers
 Containers are like miniature computers inside your computer that can package your application in a very isolated way. Ginsburg like most HPCs does not allow users to build or run Docker containers which is the most popular containerization software. This is mainly because Docker requires root privileges on the computer which is risky on a shared resource like an HPC.
-
-# Developing a Python Package on Ginsburg
-I've recently been trying to improve a package called [SECAT](link) for analyzing SEC-SWATCH Mass Spectrometry data. The package requires a lot of memory and compute to run in a reasonable amount of time. Specifically it requires more memory than I have available on my computer and it heavily utilizes multiprocessing to parallelize parts of the code. What might take hours on a local machine can be done in less than 20 minutes on the computer. Since I'm editing the code very often, hours long runs are impractical. How can we use Ginsburg to solve this problem?
 
 ## Step 1.
 First we want to create a singularity container to contain all the dependencies of our project since it uses both R and Python. In our case, there is an existing Docker container which can do this. We want to build the container on our local machine. Go to the directory with the `Dockerfile` and run
@@ -207,7 +207,14 @@ On Ginsburg, build your container from the tar file as a sandbox container
 singularity build --sandbox <sandbox name> docker-archive://<filename>.tar
 ```
 
-## Step 5.
+---
+# Developing a Python Package on Ginsburg
+I've recently been trying to improve a package called [SECAT](https://github.com/grosenberger/secat) for analyzing SEC-SWATCH Mass Spectrometry data. The package requires a lot of memory and compute to run in a reasonable amount of time. Specifically it requires more memory than I have available on my computer and it heavily utilizes multiprocessing to parallelize parts of the code. What might take hours on a local machine can be done in less than 20 minutes on the computer. Since I'm editing the code very often, hours long runs are impractical. How can we use Ginsburg to solve this problem?
+
+## Step 1.
+Make sure you have a singularity sandbox container with all the proper dependencies. If you're not sure how to make one, look at the [previous section](#building-custom-singularity-containers).
+
+## Step 2.
 Install the python package you want in editatable mode. Editable mode tells your Python interpreter to look at the folder you specified rather than the default location of your packages. First clone what ever repository you want with 
 
 ```
@@ -218,8 +225,24 @@ git clone <git repository link>
 pip install --editable .
 ```
 
-## Step 6. 
-Check that the sandbox + editable python package works properly. In my case I would edit some of the help documentation and then type in `singularity exec sandbox secat --help` to ensure that everything was installed properly. Just running the program could also be a good way to check, but just make sure your edits are properly reflected in the execution of the program.
+Ideally you want to do this in the same directory as your sandbox so the file tree might look something like this:
+
+```
+sandbox
+├── bin -> usr/bin
+├── boot
+├── dev
+├── ...
+python_package
+├── Dockerfile
+├── LICENSE
+├── README.md
+├── ...
+```
+
+
+## Step 3. 
+Check that the sandbox + editable python package works properly. In my case I would edit some of the help documentation and then type in `singularity exec sandbox secat --help` to ensure that everything was installed properly. If it works you should see your changes reflected in the output of your command. Just running the program could also be a good way to check, but make sure your edits are reflected in the program's execution. Deleting an import and checking if it works is another quick way to check.
 
 
 # Glossary
