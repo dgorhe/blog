@@ -6,7 +6,7 @@ categories: educational
 ---
 
 # Introduction
-Ginsburg is the name of Columbia University's newest high performance computing cluster (HPC). As a Data Science Master's student at the university I've been using Ginsburg for my work in the [Jovanovic Lab](https://placeholder.com). There's plenty of very basic stuff in [Ginsburg's documentation](https://placeholder.com) for how to do the basics. Here I want to cover some more involved things which could improve your quality of life while using or developing code, dramatically decrease the amount of time it takes to run code, or make some things feasible which were previously infeasible.
+Ginsburg is the name of Columbia University's newest high performance computing cluster (HPC). As a Data Science Master's student at the university I've been using Ginsburg for my work in the [Jovanovic Lab](https://placeholder.com). There's plenty of very basic stuff in [Ginsburg's documentation](https://placeholder.com). I want to cover some more involved things which could improve your quality of life while using or developing code, dramatically decrease the amount of time it takes to run code, or make some things feasible which were previously infeasible.
 
 # Glossary
 *Host Machine*: The machine you're logging into Ginsburg from. This is probably a laptop or desktop computer. You could also login via another server, but this is usually unlikely.
@@ -61,3 +61,71 @@ A really common use case in biology labs is performing some time-consuming proce
 I've found the easiest way to do this is to create a template bash script and use python to 'configure' each template and submit that configuration as a job. I'll show this with a concrete example.
 
 ## Problem
+We have a bunch of files called `.bed` files. These are the result of some analysis done on RNA-sequencing (the details are not important). We want to annotate them using a program called `annotator`. However, there are 50 files and each file takes 15-20 minutes to run. If we ran them all one after the other it would take 12-16 *hours* to run. Let's see how we can submit multiple jobs concurrently.
+
+Here is the directory structure of our folder
+
+```
+Add structure later
+```
+
+Here is our file `template.sh`
+```
+<template.sh>
+```
+
+Here is our file `submit_jobs.py`
+```
+<template.sh>
+```
+
+Here is our file `submit.sh`
+```
+<submit.sh>
+```
+
+# Building Custom Singularity Containers
+Containers are like miniature computers inside your computer that can package your application in a very isolated way. Ginsburg like most HPCs does not allow users to build or run Docker containers which is the most popular containerization software. This is mainly because Docker requires root privileges on the computer which is risky on a shared resource like an HPC.
+
+# Developing a Python Package on Ginsburg
+I've recently been trying to improve a package called [SECAT](link) for analyzing SEC-SWATCH Mass Spectrometry data. The package requires a lot of memory and compute to run in a reasonable amount of time. Specifically it requires more memory than I have available on my computer and it heavily utilizes multiprocessing to parallelize parts of the code. What might take hours on a local machine can be done in less than 20 minutes on the computer. Since I'm editing the code very often, hours long runs are impractical. How can we use Ginsburg to solve this problem?
+
+## Step 1.
+First we want to create a singularity container to contain all the dependencies of our project since it uses both R and Python. In our case, there is an existing Docker container which can do this. We want to build the container on our local machine. Go to the directory with the `Dockerfile` and run
+
+```
+ docker build . -t <tag name>
+```
+
+`<tag name>` is whatever tag you want to use to easily identify your container.
+
+## Step 2.
+Save the image as a `tar` file.
+
+```
+docker save <tag name> -o <filename>.tar
+```
+
+`<tag name>` is the same `<tag name>` from [Step 2](#step-2-1) and `filename` is whatever you want your output file to be called. If I used `darveshgorhe/secat-dev` as my tag name and `secat` as my filename I would run 
+
+```
+docker save darveshgorhe/secat-dev -o secat.tar
+```
+
+## Step 3.
+Upload the `tar` file to Ginsburg using `scp`. You can also use the Globus tool to upload the `tar` file wherever you want.
+
+```
+scp <filename>.tar '<UNI>@ginsburg.rcs.columbia.edu:<path to store tar file>'
+```
+
+## Step 4.
+On Ginsburg, build your container from the tar file as a sandbox container
+
+```
+singularity build --sandbox <sandbox name> docker-archive://<filename>.tar
+```
+
+## Step 5. 
+Check that the sandbox works properly.
+
