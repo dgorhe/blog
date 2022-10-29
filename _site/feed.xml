@@ -1,4 +1,109 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.2.1">Jekyll</generator><link href="http://localhost:4000/blog/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/blog/" rel="alternate" type="text/html" /><updated>2022-03-21T11:54:01-04:00</updated><id>http://localhost:4000/blog/feed.xml</id><title type="html">Know Thyself</title><subtitle>I'm a pathologically curious person and an aspiring data scientist. If you have suggestions, feel free to email me. If any of the information looks incorrect, send me a source to what  you believe is the correct information and I'll take a look and change the post accordingly.</subtitle><entry><title type="html">Beyond Bitcoin: How to Implement Decentralized Societies</title><link href="http://localhost:4000/blog/decentralization/2022/01/07/Beyond-Bitcoin.html" rel="alternate" type="text/html" title="Beyond Bitcoin: How to Implement Decentralized Societies" /><published>2022-01-07T12:10:00-05:00</published><updated>2022-01-07T12:10:00-05:00</updated><id>http://localhost:4000/blog/decentralization/2022/01/07/Beyond-Bitcoin</id><content type="html" xml:base="http://localhost:4000/blog/decentralization/2022/01/07/Beyond-Bitcoin.html"><![CDATA[<h2 id="preamble">Preamble</h2>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.2.1">Jekyll</generator><link href="https://dgorhe.github.io/blog/feed.xml" rel="self" type="application/atom+xml" /><link href="https://dgorhe.github.io/blog/" rel="alternate" type="text/html" /><updated>2022-10-28T23:00:17-04:00</updated><id>https://dgorhe.github.io/blog/feed.xml</id><title type="html">Know Thyself</title><subtitle>I'm a pathologically curious person and an aspiring data scientist. If you have suggestions, feel free to email me. If any of the information looks incorrect, send me a source to what  you believe is the correct information and I'll take a look and change the post accordingly.</subtitle><entry><title type="html">Using Columbia University’s Ginsburg HPC</title><link href="https://dgorhe.github.io/blog/educational/2022/10/28/How-To-Use-Ginsburg.html" rel="alternate" type="text/html" title="Using Columbia University’s Ginsburg HPC" /><published>2022-10-28T16:00:00-04:00</published><updated>2022-10-28T16:00:00-04:00</updated><id>https://dgorhe.github.io/blog/educational/2022/10/28/How-To-Use-Ginsburg</id><content type="html" xml:base="https://dgorhe.github.io/blog/educational/2022/10/28/How-To-Use-Ginsburg.html"><![CDATA[<h1 id="introduction">Introduction</h1>
+<p>Ginsburg is the name of Columbia University’s newest high performance computing cluster (HPC). As a Data Science Master’s student at the university I’ve been using Ginsburg for my work in the <a href="https://placeholder.com">Jovanovic Lab</a>. There’s plenty of very basic stuff in <a href="https://placeholder.com">Ginsburg’s documentation</a> for how to do the basics. Here I want to cover some more involved things which could improve your quality of life while using or developing code, dramatically decrease the amount of time it takes to run code, or make some things feasible which were previously infeasible.</p>
+
+<h1 id="glossary">Glossary</h1>
+<p><em>Host Machine</em>: The machine you’re logging into Ginsburg from. This is probably a laptop or desktop computer. You could also login via another server, but this is usually unlikely.</p>
+
+<p><em>Remote Machine</em>: This is Ginsburg in our case. But generally, it’s a computer that you want to access from a distance over a network (not necessarily the internet).</p>
+
+<h1 id="how-to-avoid-typing-your-password-each-time">How to Avoid Typing Your Password Each Time</h1>
+<p>This seems like a pretty pedantic thing, but if you’re logging in and out of Ginsburg all the time, it can get pretty annoying. Fortunately there’s a pretty simple solution. Your computer checks a folder called <code class="language-plaintext highlighter-rouge">~/.ssh/</code> whenever you login via <code class="language-plaintext highlighter-rouge">ssh</code>. Specifically it checks whether a matching key is available on the remote machine. It’s not exactly a copy but the details are not super important.</p>
+
+<h2 id="step-1">Step 1.</h2>
+<p>First we want to check if the key is already available</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>ls ~/.ssh/
+</code></pre></div></div>
+
+<p>If the files <code class="language-plaintext highlighter-rouge">id_ed25519</code> and <code class="language-plaintext highlighter-rouge">id_ed25519.pub</code> are already there, skip to <a href="#step-3">Step 3</a></p>
+
+<h2 id="step-2">Step 2.</h2>
+<p>Assuming the keys are not there, we’ll generate them with the following command</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>ssh-keygen -t ed25519
+</code></pre></div></div>
+
+<p>Follow the prompts (you can leave everything blank) and it should look something like this.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Generating public/private ed25519 key pair.
+Enter file in which to save the key ($HOME/.ssh/id_ed25519):     
+Enter passphrase (empty for no passphrase):  
+Enter same passphrase again:  
+Your identification has been saved in $HOME/.ssh/id_ed25519.
+Your public key has been saved in $HOME/.ssh/id_ed25519.pub.
+</code></pre></div></div>
+
+<h2 id="step-3">Step 3.</h2>
+<p>Now we want to put the public key onto Ginsburg with the following command. Make sure to replace <code class="language-plaintext highlighter-rouge">&lt;UNI&gt;</code> with your actual UNI. This part will still prompt you to put in your password.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>cat ~/.ssh/id_ed25519.pub | ssh &lt;UNI&gt;@ginsburg.rcs.columbia.edu 'cat - &gt;&gt; ~/.ssh/authorized_keys' 
+</code></pre></div></div>
+
+<p>This command basically opens one of the files we just created, sends it over to Ginsburg, and tells Ginsburg to recognize the host computer (i.e. your laptop, desktop, etc) whenever we use <code class="language-plaintext highlighter-rouge">ssh</code>.</p>
+
+<h2 id="step-4">Step 4.</h2>
+<p>Double check that everything works by logging out of Ginsburg (you can just type <code class="language-plaintext highlighter-rouge">exit</code> and then hit Enter to leave Ginsburg).</p>
+
+<h1 id="performing-multiple-jobs-concurrently">Performing Multiple Jobs Concurrently</h1>
+<p>A really common use case in biology labs is performing some time-consuming processing/analysis on multiple files. More generally, sometimes we want to run some code repeatedly with different parameters and the inputs of each run are not dependent on the outputs of another run. As a result we don’t care how quickly each thing finishes as long as we don’t have to do them one after another.</p>
+
+<p>I’ve found the easiest way to do this is to create a template bash script and use python to ‘configure’ each template and submit that configuration as a job. I’ll show this with a concrete example.</p>
+
+<h2 id="problem">Problem</h2>]]></content><author><name></name></author><category term="educational" /><summary type="html"><![CDATA[Introduction Ginsburg is the name of Columbia University’s newest high performance computing cluster (HPC). As a Data Science Master’s student at the university I’ve been using Ginsburg for my work in the Jovanovic Lab. There’s plenty of very basic stuff in Ginsburg’s documentation for how to do the basics. Here I want to cover some more involved things which could improve your quality of life while using or developing code, dramatically decrease the amount of time it takes to run code, or make some things feasible which were previously infeasible.]]></summary></entry><entry><title type="html">Redefining-Education: How Can We Change the Meta-constraints?</title><link href="https://dgorhe.github.io/blog/education/2022/08/24/Redefining-Education.html" rel="alternate" type="text/html" title="Redefining-Education: How Can We Change the Meta-constraints?" /><published>2022-08-24T16:00:00-04:00</published><updated>2022-08-24T16:00:00-04:00</updated><id>https://dgorhe.github.io/blog/education/2022/08/24/Redefining-Education</id><content type="html" xml:base="https://dgorhe.github.io/blog/education/2022/08/24/Redefining-Education.html"><![CDATA[<h2 id="scope">Scope</h2>
+<ul>
+  <li>K-12 education</li>
+  <li>No higher education</li>
+  <li>Should apply to all grades but…</li>
+  <li>Some advice is more applicable/specific to high school</li>
+  <li>Going to explain ideas at multiple levels of depth</li>
+  <li>Each level of depth discusses further n-th order effects and more subtle considerations</li>
+</ul>
+
+<h2 id="list-of-ideas">List of ideas</h2>
+<p>The 5 ideas I propose are as follows:</p>
+<ul>
+  <li>Teachers as advisors versus lecturers</li>
+  <li>Setting clear numeracy goals</li>
+  <li>Fixed-value per student voucher system</li>
+  <li>Testing as a means of progression</li>
+  <li>Mandatory rotational programs for students</li>
+</ul>
+
+<h2 id="surface-level-explanation">Surface Level Explanation</h2>
+<h3 id="teachers-as-advisors-versus-lecturers">Teachers as advisors versus lecturers</h3>
+<p>PhDs are valued because much of the work by the candidate is done asynchronously and independently. The internet is also filled with high quality instruction/lectures on a wide variety of topics. A teacher shouldn’t be repeating the same material over and over to different students, we have the internet for that. Instead, teachers should be advisors to students in order to spend high-quality time with them even if that time is less in quantity per child.</p>
+
+<ul>
+  <li>Need to run the math on how this plan would affect number of teachers</li>
+</ul>
+
+<h3 id="setting-clear-numeracy-goals">Setting clear numeracy goals</h3>
+<p>We have a clear language for describing literacy among children. We can discretize students’ reading ability by grade level. It’s not a perfect system, but at least it’s directionally helpful. A particular student at a 3rd grade reading level may know more than a particular student at a 4th grade reading level. However, a student at a 12th grade reading level can almost assuredly read better than a student at a 4th grade reading level. We should create a similar metric for math called numeracy. Basically, at what is a child’s aptitude to manipulate and transform numerical concepts?</p>
+
+<h3 id="fixed-value-per-student-voucher-system">Fixed-value per student voucher system</h3>
+<p>Each school gets some fixed amount per student they enroll. They are free to charge anything above that amount. But there’s a minimum guaranteed amount regardless of property tax and year-to-year fluctuations.</p>
+
+<h3 id="testing-as-a-means-of-progression">Testing as a means of progression</h3>
+<p>Every student should always be able to test out of any course at any time. The earlier they test out relative to their age, the stricter the cutoff (i.e. higher percentage needed to pass). They can get multiple attempts, but fixed number per time window. If there are expected ages for the courses, the student will have to re-test in order to not remediate back to that class. In other words, the student has to demonstrate that they retained the knowledge for the course they tested out of early.</p>
+
+<h3 id="mandatory-rotational-programs-for-students">Mandatory rotational programs for students</h3>
+<p>This primarily applies to high schools. Before graduating, I believe half the time should be spent rotating through various types of positions. This connects with the voucher system since this can be used to incentivize employers to take on students through rotation programs. Students and parents may sign a release form for some physical labor, but there would need to exist some state-level restrictions since this could become a perverse incentive for cheap labor for hazardous work.</p>
+
+<hr />
+<h2 id="slightly-deeper-explanation">Slightly Deeper Explanation</h2>
+<h3 id="teachers-as-advisors-versus-lecturers-1">Teachers as advisors versus lecturers</h3>
+<h3 id="setting-clear-numeracy-goals-1">Setting clear numeracy goals</h3>
+<h3 id="fixed-value-per-student-voucher-system-1">Fixed-value per student voucher system</h3>
+<h3 id="testing-as-a-means-of-progression-1">Testing as a means of progression</h3>
+<h3 id="mandatory-rotational-programs-for-students-1">Mandatory rotational programs for students</h3>
+
+<hr />
+<h2 id="deep-explanation">Deep Explanation</h2>
+<h3 id="teachers-as-advisors-versus-lecturers-2">Teachers as advisors versus lecturers</h3>
+<h3 id="setting-clear-numeracy-goals-2">Setting clear numeracy goals</h3>
+<h3 id="fixed-value-per-student-voucher-system-2">Fixed-value per student voucher system</h3>
+<h3 id="testing-as-a-means-of-progression-2">Testing as a means of progression</h3>
+<h3 id="mandatory-rotational-programs-for-students-2">Mandatory rotational programs for students</h3>]]></content><author><name></name></author><category term="education" /><summary type="html"><![CDATA[Scope K-12 education No higher education Should apply to all grades but… Some advice is more applicable/specific to high school Going to explain ideas at multiple levels of depth Each level of depth discusses further n-th order effects and more subtle considerations]]></summary></entry><entry><title type="html">Beyond Bitcoin: How to Implement Decentralized Societies</title><link href="https://dgorhe.github.io/blog/decentralization/2022/01/07/Beyond-Bitcoin.html" rel="alternate" type="text/html" title="Beyond Bitcoin: How to Implement Decentralized Societies" /><published>2022-01-07T12:10:00-05:00</published><updated>2022-01-07T12:10:00-05:00</updated><id>https://dgorhe.github.io/blog/decentralization/2022/01/07/Beyond-Bitcoin</id><content type="html" xml:base="https://dgorhe.github.io/blog/decentralization/2022/01/07/Beyond-Bitcoin.html"><![CDATA[<h2 id="preamble">Preamble</h2>
 <p>I’m writing this out of self-interest as well as a desire to push technological progressivism. As <a href="https://balajis.com/the-purpose-of-technology/">Balaji Srinivasan put it in 2013</a>:</p>
 
 <blockquote>
