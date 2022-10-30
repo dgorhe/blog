@@ -9,6 +9,77 @@ categories: educational
 Ginsburg is the name of Columbia University's newest high performance computing cluster (HPC). As a Data Science Master's student at the university I've been using Ginsburg for my work in the [Jovanovic Lab](http://jovanoviclab.com/). There's plenty of very basic stuff in [Ginsburg's documentation](https://confluence.columbia.edu/confluence/display/rcs/Ginsburg%3A+Getting+Started). I want to cover some more involved things which could improve your quality of life while using or developing code, dramatically decrease the amount of time it takes to run code, or make some things feasible which were previously infeasible.
 
 ---
+
+# Create an Alias for Interactive Sessions
+Let's start with something easy. Oftentimes, we want interactive environments for coding but you need more resources than your local machine has. Ginsburg is useful for this because you can get a *lot* of resources (hopefully) quickly and at a moments notice. What's annoying is that the command might look something like this:
+
+```
+srun --pty -t 0-03:00 -A mjlab --mem=64gb -N 1 -c 32 /bin/bash
+```
+
+You can look at the [documentation](https://confluence.columbia.edu/confluence/display/rcs/Ginsburg+-+Submitting+Jobs#:~:text=shell%20will%20wait.-,Basic%20Job%20Directives,-The%20following%20table) for what each part means, but the bottom-line is that this is extremely annoying to type repeatedly. It's especially annoying because you probably want the same resources each time you start an interactive session. We can solve this by creating an alias for this command. Open the `.bashrc` file in your respective home directory. This file contains a bunch of settings for the shell that Ginsburg shows to you (i.e. the terminal when you login). Use your text editor of choice. In my case, I'll use vim.
+
+```
+vim ~/.bashrc
+```
+
+The file will look something like this
+
+```
+# .bashrc
+
+# User specific aliases and functions
+
+alias rm='rm -i'
+alias cp='cp -i'
+alias mv='mv -i'
+
+# Source global definitions
+if [ -f /etc/bashrc ]; then
+        . /etc/bashrc
+fi
+
+# >>> conda initialize >>>
+# !! Contents within this block are managed by 'conda init' !!
+__conda_setup="$('/burg/opt/anaconda2-2019.10/anaconda2/bin/conda' 'shell.bash' 'hook' 2> /dev/null)"
+if [ $? -eq 0 ]; then
+    eval "$__conda_setup"
+else
+    if [ -f "/burg/opt/anaconda2-2019.10/anaconda2/etc/profile.d/conda.sh" ]; then
+        . "/burg/opt/anaconda2-2019.10/anaconda2/etc/profile.d/conda.sh"
+    else
+        export PATH="/burg/opt/anaconda2-2019.10/anaconda2/bin:$PATH"
+    fi
+fi
+unset __conda_setup
+# <<< conda initialize <<<
+```
+
+You can ignore most stuff but toward the top where all the `alias ...` commands are, we'll add our alias. In my case, I'm calling it `sesh`
+
+```
+# .bashrc
+
+# User specific aliases and functions
+
+alias rm='rm -i'
+alias cp='cp -i'
+alias mv='mv -i'
+alias sesh='srun --pty -t 0-03:00 -A mjlab --mem=64gb -N 1 -c 32 /bin/bash'
+
+...
+```
+
+I'm not showing the remainder of the file again to save some space, but I didn't change or delete any of it. You can always come back and change this, but think of this as a default. Now when you run 
+
+```
+sesh
+```
+
+you'll start an interactive session with all the settings you put in that alias. 
+
+---
+
 # How to Avoid Typing Your Password Each Time 
 This seems like a pretty pedantic thing, but if you're logging in and out of Ginsburg all the time, it can get pretty annoying. Fortunately there's a pretty simple solution. Your computer checks a folder called `~/.ssh/` whenever you login via `ssh`. Specifically it checks whether a matching key is available on the remote machine. It's not exactly a copy but the details are not super important.
 
