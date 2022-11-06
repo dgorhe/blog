@@ -80,7 +80,7 @@ you'll start an interactive session with all the settings you put in that alias.
 
 ---
 
-# How to Avoid Typing Your Password Each Time 
+# How to Avoid Typing Your Password Each Time (Option 1)
 This seems like a pretty pedantic thing, but if you're logging in and out of Ginsburg all the time, it can get pretty annoying. Fortunately there's a pretty simple solution. Your computer checks a folder called `~/.ssh/` whenever you login via `ssh`. Specifically it checks whether a matching key is available on the remote machine. It's not exactly a copy but the details are not super important.
 
 ### Step 1.
@@ -123,6 +123,28 @@ This command basically opens one of the files we just created, sends it over to 
 Double check that everything works by logging out of Ginsburg (you can just type `exit` and then hit Enter to leave Ginsburg).
 
 ---
+# How to Avoid Typing Your Password Each Time (Option 2)
+If option 1 doesn't interest you, there's another option, `sshpass`. `sshpass` simply forwards your password to the ssh prompt automatically. If you're using a public private key pair (i.e. option 1), at some point the remote machine has to read your private key. If you trust the server, this is not an issue, but if you're not sure, using `sshpass` could be more secure. Passwords are typically hashed on the host end (i.e. your laptop, desktop, etc) so you're never giving your sensitive credentials to the remote machine. However, it seems like the maintainer of `sshpass` is no longer actively maintaining the software. This could mean that there are unresolved bugs which could impact the security of the software. Both options are equally as convenient once you set them up.
+
+The easiest way to install `sshpass` is via Homebrew, a package manager for MacOS. As of writing this, there is no Windows version available. Please look at the Homebrew homepage for instructions on [installing Homebrew](https://brew.sh/). Once you have Homebrew installed, in your terminal simply type:
+
+```
+brew install hudochenkov/sshpass/sshpass
+```
+
+Once it's installed in your `.bashrc` or `.zshrc` add the following alias 
+
+```
+alias ginsburg='sshpass -p '<PASSWORD>' ssh <UNI>@ginsburg.rcs.columbia.edu'
+```
+
+You can replace `ginsburg` with whatever alias name you would like. Also, replace `<PASSWORD>` with your actual password and `<UNI>` with your actual UNI. With all that set up, when you type in the following and hit enter, you should be logged into the Ginsburg cluster.
+
+```
+ginsburg
+```
+
+---
 # Performing Multiple Jobs Concurrently
 A really common use case in biology labs is performing some time-consuming processing/analysis on multiple files. More generally, sometimes we want to run a program multiple times with different parameters and the inputs of each run are not dependent on the outputs of another run. As a result we don't care how quickly each thing finishes as long as we don't have to do them one after another. 
 
@@ -139,6 +161,8 @@ Here is the directory structure of our folder
 ├── submit.sh
 └── template.sh
 ```
+
+`template.sh` is the file which is actually sent as an individual batch job. `submit_jobs.py` creates a group of jobs based on `template.sh`. `submit.sh` is simply a convenience script for configuring 1 or more groups of jobs. The reason for this structure is that `submit_job.py` looks at all the `bed` files in a folder. If we want to run multiple folders, we have to run `submit_job.py` multiple times each with different parameters. If you knew that you only needed to run 1 folder at a time, you could simply type out the contents of `submit.sh` into your terminal and hit enter. Let's look at each file in more detail.
 
 Here is the `template.sh` file
 ```
@@ -216,7 +240,12 @@ At the top we initialize an argument parser to read in some command line argumen
 command += f"--export=INPUT={bed},OUTPUT={out},GTFDB={gtfdb} "
 ```
 
-Notice that `INPUT`, `OUTPUT`, and `GTFDB` are the same variables we specfied in our `template.sh` script.
+Notice that `INPUT`, `OUTPUT`, and `GTFDB` are the same variables we specfied in our `template.sh` script. The final string gets passed to `os.system()` which runs the command as if you were typing it out in the terminal. An example command might look something like this
+
+```
+sbatch -A mjlab -o ./logs --export=INPUT=./bedfiles,OUTPUT=./out,GTFDB=hg41.gtf.db template.sh
+```
+
 
 Here is an example of the `submit.sh` file
 ```
@@ -280,21 +309,31 @@ singularity build --sandbox <sandbox name> docker-archive://<filename>.tar
 
 ---
 # Developing a Python Package on Ginsburg
-I've recently been trying to improve a package called [SECAT](https://github.com/grosenberger/secat) for analyzing SEC-SWATCH Mass Spectrometry data. The package requires a lot of memory and compute to run in a reasonable amount of time. Specifically it requires more memory than I have available on my computer and it heavily utilizes multiprocessing to parallelize parts of the code. What might take hours on a local machine can be done in less than 20 minutes on the computer. Since I'm editing the code very often, hours long runs are impractical. How can we use Ginsburg to solve this problem?
+I've recently been trying to improve a package called [SECAT](https://github.com/grosenberger/secat) for analyzing SEC-SWATH mass Spectrometry data. The package requires a lot of memory and compute to run in a reasonable amount of time. Specifically, it requires more memory than I have available on my computer and it heavily utilizes multiprocessing to parallelize parts of the code. What might take hours on my laptop can be done in less than 20 minutes on the computer. Since I'm editing the code very often, running it on my local computer is impractical. How can we use Ginsburg to solve this problem?
 
 ### Step 1.
 Make sure you have a singularity sandbox container with all the proper dependencies. If you're not sure how to make one, look at the [previous section](#building-custom-singularity-containers).
 
 ### Step 2.
-Install the python package you want in editatable mode. Editable mode tells your Python interpreter to look at the folder you specified rather than the default location of your packages. First clone what ever repository you want with 
+First clone what ever repository you want with 
 
 ```
 git clone <git repository link>
 ```
 
+By default this copies the contents of the repository into a folder in your current working directory with the same name as the repository. So if I was in `/home/` and I ran `git@github.com:grosenberger/secat.git` it would create a folder called `secat` in `/home/` and the contents of the repository would be in `/home/secat`. If you want to copy it somewhere else, run
+
+```
+git clone <git repository link> <desired folder>
+```
+
+Where `<desired folder>` is where you want the contents of the repository to be copied to. Once this is done, navigate to the repository you downloaded. In the case of the example you could do `cd /home/secat` to enter into the repository folder. We're going to install the python package in editatable mode. Editable mode tells your Python interpreter to look at the folder you specified rather than the default location of your packages.
+
 ```
 pip install --editable .
 ```
+
+The `.` tells `pip` to look in the current folder for the python package, specifically the `setup.py` file. If this runs successfully, you should see a `.egg-info` file generated. This is what tells `pip` to look in the current folder rather than where it normally looks for packages.
 
 Ideally you want to do this in the same directory as your sandbox so the file tree might look something like this:
 

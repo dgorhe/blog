@@ -117,7 +117,7 @@ alias sesh='srun --pty -t 0-03:00 -A mjlab --mem=64gb -N 1 -c 32 /bin/bash'
 
 <hr />
 
-<h1 id="how-to-avoid-typing-your-password-each-time">How to Avoid Typing Your Password Each Time</h1>
+<h1 id="how-to-avoid-typing-your-password-each-time-option-1">How to Avoid Typing Your Password Each Time (Option 1)</h1>
 <p>This seems like a pretty pedantic thing, but if you’re logging in and out of Ginsburg all the time, it can get pretty annoying. Fortunately there’s a pretty simple solution. Your computer checks a folder called <code class="language-plaintext highlighter-rouge">~/.ssh/</code> whenever you login via <code class="language-plaintext highlighter-rouge">ssh</code>. Specifically it checks whether a matching key is available on the remote machine. It’s not exactly a copy but the details are not super important.</p>
 
 <h3 id="step-1">Step 1.</h3>
@@ -156,6 +156,25 @@ Your public key has been saved in $HOME/.ssh/id_ed25519.pub.
 <p>Double check that everything works by logging out of Ginsburg (you can just type <code class="language-plaintext highlighter-rouge">exit</code> and then hit Enter to leave Ginsburg).</p>
 
 <hr />
+<h1 id="how-to-avoid-typing-your-password-each-time-option-2">How to Avoid Typing Your Password Each Time (Option 2)</h1>
+<p>If option 1 doesn’t interest you, there’s another option, <code class="language-plaintext highlighter-rouge">sshpass</code>. <code class="language-plaintext highlighter-rouge">sshpass</code> simply forwards your password to the ssh prompt automatically. If you’re using a public private key pair (i.e. option 1), at some point the remote machine has to read your private key. If you trust the server, this is not an issue, but if you’re not sure, using <code class="language-plaintext highlighter-rouge">sshpass</code> could be more secure. Passwords are typically hashed on the host end (i.e. your laptop, desktop, etc) so you’re never giving your sensitive credentials to the remote machine. However, it seems like the maintainer of <code class="language-plaintext highlighter-rouge">sshpass</code> is no longer actively maintaining the software. This could mean that there are unresolved bugs which could impact the security of the software. Both options are equally as convenient once you set them up.</p>
+
+<p>The easiest way to install <code class="language-plaintext highlighter-rouge">sshpass</code> is via Homebrew, a package manager for MacOS. As of writing this, there is no Windows version available. Please look at the Homebrew homepage for instructions on <a href="https://brew.sh/">installing Homebrew</a>. Once you have Homebrew installed, in your terminal simply type:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>brew install hudochenkov/sshpass/sshpass
+</code></pre></div></div>
+
+<p>Once it’s installed in your <code class="language-plaintext highlighter-rouge">.bashrc</code> or <code class="language-plaintext highlighter-rouge">.zshrc</code> add the following alias</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>alias ginsburg='sshpass -p '&lt;PASSWORD&gt;' ssh &lt;UNI&gt;@ginsburg.rcs.columbia.edu'
+</code></pre></div></div>
+
+<p>You can replace <code class="language-plaintext highlighter-rouge">ginsburg</code> with whatever alias name you would like. Also, replace <code class="language-plaintext highlighter-rouge">&lt;PASSWORD&gt;</code> with your actual password and <code class="language-plaintext highlighter-rouge">&lt;UNI&gt;</code> with your actual UNI. With all that set up, when you type in the following and hit enter, you should be logged into the Ginsburg cluster.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>ginsburg
+</code></pre></div></div>
+
+<hr />
 <h1 id="performing-multiple-jobs-concurrently">Performing Multiple Jobs Concurrently</h1>
 <p>A really common use case in biology labs is performing some time-consuming processing/analysis on multiple files. More generally, sometimes we want to run a program multiple times with different parameters and the inputs of each run are not dependent on the outputs of another run. As a result we don’t care how quickly each thing finishes as long as we don’t have to do them one after another.</p>
 
@@ -171,6 +190,8 @@ Your public key has been saved in $HOME/.ssh/id_ed25519.pub.
 ├── submit.sh
 └── template.sh
 </code></pre></div></div>
+
+<p><code class="language-plaintext highlighter-rouge">template.sh</code> is the file which is actually sent as an individual batch job. <code class="language-plaintext highlighter-rouge">submit_jobs.py</code> creates a group of jobs based on <code class="language-plaintext highlighter-rouge">template.sh</code>. <code class="language-plaintext highlighter-rouge">submit.sh</code> is simply a convenience script for configuring 1 or more groups of jobs. The reason for this structure is that <code class="language-plaintext highlighter-rouge">submit_job.py</code> looks at all the <code class="language-plaintext highlighter-rouge">bed</code> files in a folder. If we want to run multiple folders, we have to run <code class="language-plaintext highlighter-rouge">submit_job.py</code> multiple times each with different parameters. If you knew that you only needed to run 1 folder at a time, you could simply type out the contents of <code class="language-plaintext highlighter-rouge">submit.sh</code> into your terminal and hit enter. Let’s look at each file in more detail.</p>
 
 <p>Here is the <code class="language-plaintext highlighter-rouge">template.sh</code> file</p>
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>#!/bin/sh
@@ -245,7 +266,10 @@ if __name__ == "__main__":
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>command += f"--export=INPUT={bed},OUTPUT={out},GTFDB={gtfdb} "
 </code></pre></div></div>
 
-<p>Notice that <code class="language-plaintext highlighter-rouge">INPUT</code>, <code class="language-plaintext highlighter-rouge">OUTPUT</code>, and <code class="language-plaintext highlighter-rouge">GTFDB</code> are the same variables we specfied in our <code class="language-plaintext highlighter-rouge">template.sh</code> script.</p>
+<p>Notice that <code class="language-plaintext highlighter-rouge">INPUT</code>, <code class="language-plaintext highlighter-rouge">OUTPUT</code>, and <code class="language-plaintext highlighter-rouge">GTFDB</code> are the same variables we specfied in our <code class="language-plaintext highlighter-rouge">template.sh</code> script. The final string gets passed to <code class="language-plaintext highlighter-rouge">os.system()</code> which runs the command as if you were typing it out in the terminal. An example command might look something like this</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>sbatch -A mjlab -o ./logs --export=INPUT=./bedfiles,OUTPUT=./out,GTFDB=hg41.gtf.db template.sh
+</code></pre></div></div>
 
 <p>Here is an example of the <code class="language-plaintext highlighter-rouge">submit.sh</code> file</p>
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>ROOT="/burg/mjlab/users/ew2579/"
@@ -302,19 +326,28 @@ python submit_jobs.py \
 
 <hr />
 <h1 id="developing-a-python-package-on-ginsburg">Developing a Python Package on Ginsburg</h1>
-<p>I’ve recently been trying to improve a package called <a href="https://github.com/grosenberger/secat">SECAT</a> for analyzing SEC-SWATCH Mass Spectrometry data. The package requires a lot of memory and compute to run in a reasonable amount of time. Specifically it requires more memory than I have available on my computer and it heavily utilizes multiprocessing to parallelize parts of the code. What might take hours on a local machine can be done in less than 20 minutes on the computer. Since I’m editing the code very often, hours long runs are impractical. How can we use Ginsburg to solve this problem?</p>
+<p>I’ve recently been trying to improve a package called <a href="https://github.com/grosenberger/secat">SECAT</a> for analyzing SEC-SWATH mass Spectrometry data. The package requires a lot of memory and compute to run in a reasonable amount of time. Specifically, it requires more memory than I have available on my computer and it heavily utilizes multiprocessing to parallelize parts of the code. What might take hours on my laptop can be done in less than 20 minutes on the computer. Since I’m editing the code very often, running it on my local computer is impractical. How can we use Ginsburg to solve this problem?</p>
 
 <h3 id="step-1-2">Step 1.</h3>
 <p>Make sure you have a singularity sandbox container with all the proper dependencies. If you’re not sure how to make one, look at the <a href="#building-custom-singularity-containers">previous section</a>.</p>
 
 <h3 id="step-2-2">Step 2.</h3>
-<p>Install the python package you want in editatable mode. Editable mode tells your Python interpreter to look at the folder you specified rather than the default location of your packages. First clone what ever repository you want with</p>
+<p>First clone what ever repository you want with</p>
 
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git clone &lt;git repository link&gt;
 </code></pre></div></div>
 
+<p>By default this copies the contents of the repository into a folder in your current working directory with the same name as the repository. So if I was in <code class="language-plaintext highlighter-rouge">/home/</code> and I ran <code class="language-plaintext highlighter-rouge">git@github.com:grosenberger/secat.git</code> it would create a folder called <code class="language-plaintext highlighter-rouge">secat</code> in <code class="language-plaintext highlighter-rouge">/home/</code> and the contents of the repository would be in <code class="language-plaintext highlighter-rouge">/home/secat</code>. If you want to copy it somewhere else, run</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git clone &lt;git repository link&gt; &lt;desired folder&gt;
+</code></pre></div></div>
+
+<p>Where <code class="language-plaintext highlighter-rouge">&lt;desired folder&gt;</code> is where you want the contents of the repository to be copied to. Once this is done, navigate to the repository you downloaded. In the case of the example you could do <code class="language-plaintext highlighter-rouge">cd /home/secat</code> to enter into the repository folder. We’re going to install the python package in editatable mode. Editable mode tells your Python interpreter to look at the folder you specified rather than the default location of your packages.</p>
+
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>pip install --editable .
 </code></pre></div></div>
+
+<p>The <code class="language-plaintext highlighter-rouge">.</code> tells <code class="language-plaintext highlighter-rouge">pip</code> to look in the current folder for the python package, specifically the <code class="language-plaintext highlighter-rouge">setup.py</code> file. If this runs successfully, you should see a <code class="language-plaintext highlighter-rouge">.egg-info</code> file generated. This is what tells <code class="language-plaintext highlighter-rouge">pip</code> to look in the current folder rather than where it normally looks for packages.</p>
 
 <p>Ideally you want to do this in the same directory as your sandbox so the file tree might look something like this:</p>
 
